@@ -1,0 +1,77 @@
+AT Desenvolvimento de Data Driven Apps com Python
+
+Aluno: Giovano M Panatta
+
+O que você vai fazer?
+O projeto consiste em criar uma aplicação de análise de partidas de futebol que será desenvolvida em duas abordagens:
+FastAPI + LLM: Criação de uma API para geração de perfis de jogadores, sumarização e narrativas.
+Streamlit + LangChain (ReAct Agent + Tools): Uma interface interativa e poderosa para explorar os mesmos dados.
+Funcionalidades principais
+Perfil de jogador: Estatísticas detalhadas e análise sobre jogadores da partida.
+Sumarização de eventos: Transformação dos eventos da partida em um texto descritivo.
+Narração personalizada: Geração de textos de narração de acordo com o estilo escolhido.
+Agora, mãos à obra! Aqui estão as etapas do projeto:
+Configuração do Ambiente e Integração com a API StatsBombPy:
+Configure o ambiente de desenvolvimento (Python 3.8+).
+Instale a biblioteca StatsBombPy e outras dependências necessárias.
+Produza um arquivo requirements.txt com todas as bibliotecas utilizadas no projeto.
+Crie uma função simples que receba uma ID de partida e retorne os dados brutos dessa partida utilizando a API.
+Organização do Projeto e Publicação no GitHub:
+Estruture o projeto em pastas organizadas (e.g., app, docs).
+Inclua um arquivo README.md com as seguintes informações:
+Descrição do projeto e objetivo.
+Instruções para configurar o ambiente e executar o código.
+Exemplos de entrada e saída das funcionalidades.
+Use commits claros e bem descritos ao longo do desenvolvimento.
+Sumarização de Partidas com LLM:
+Desenvolva uma função que:
+Identifique os eventos principais da partida (gols, assistências, cartões, etc.).
+Utilize um modelo LLM para transformar esses eventos em uma sumarização textual descritiva.
+Certifique-se de que a saída seja clara e amigável, como:
+"O time A venceu o time B por 3 a 1. Os destaques foram os gols de João e Lucas, além de uma assistência de Ana."
+Criação de Perfil de Jogador:
+Desenvolva uma funcionalidade que permita criar um perfil detalhado de um jogador específico da partida, contendo:
+Nome do jogador.
+Estatísticas como número de passes, finalizações, desarmes e minutos jogados.
+Retorne os dados de forma clara e organizada (e.g., JSON ou tabela).
+Desenvolvimento de uma API com FastAPI:
+Crie os seguintes endpoints:
+/match_summary: Retorna a sumarização de uma partida.
+/player_profile: Retorna o perfil detalhado de um jogador.
+Utilize Pydantic para validar as entradas e saídas.
+Narração Personalizada de Partidas
+Desenvolva uma funcionalidade para criar narrativas baseadas nos eventos da partida.
+Permita ao usuário escolher entre estilos de narração, como:
+Formal (técnico e objetivo).
+Humorístico (descontraído e criativo).
+Técnico (análise detalhada dos eventos).
+Interface Inicial com Streamlit
+Desenvolva uma interface simples que permita ao usuário:
+Selecionar uma partida por ID.
+Exibir os eventos principais e o perfil de um jogador.
+Mostrar os resultados de forma visual e amigável.
+Criação de um Agente ReAct com LangChain:
+Configure um agente utilizando LangChain para interagir com os dados da partida.
+Implemente ferramentas para realizar:
+Consulta de eventos específicos da partida.
+Geração de comparações entre dois jogadores.
+Habilite o agente a responder perguntas como:
+"Quem deu mais passes na partida?"
+"Qual jogador teve mais finalizações no primeiro tempo?"
+Aprimoramento da Interface com Funcionalidades Avançadas:
+Melhore a interface Streamlit, adicionando:
+Filtros para explorar eventos específicos (e.g., apenas gols ou cartões).
+Visualizações gráficas para estatísticas dos jogadores (e.g., gráficos de barras, tabelas interativas).
+Comparação direta entre dois jogadores selecionados.
+Integração Completa das Funcionalidades:
+Garanta que o fluxo completo esteja funcional:
+Seleção da partida.
+Geração da sumarização e narrativas.
+Criação de perfis detalhados de jogadores.
+Certifique-se de que as versões em FastAPI e Streamlit sejam independentes, mas cubram as mesmas funcionalidades.
+Entrega do Projeto
+Publique o projeto no GitHub, garantindo que contenha:
+Código funcional e organizado.
+Documentação clara no README.md.
+Histórico de commits que mostre o progresso iterativo do desenvolvimento.
+Inclua o arquivo requirements.txt com todas as dependências.
