@@ -7,6 +7,7 @@ requests==2.31.0
 pandas==2.1.4
 plotly==5.18.0
 numpy==1.26.2
-openai==1.6.1
+google-generativeai==0.3.1
+google-cloud-aiplatform==1.36.4
 chromadb==0.4.18
 tiktoken==0.5.2
