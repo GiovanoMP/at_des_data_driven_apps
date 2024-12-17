@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "football_analysis"
 version = "1.0.0"
 authors = [
-    { name = "Your Name", email = "your.email@example.com" },
+    { name = "Giovano M Panatta", email = "giovano.m.panatta@gmail.com" },
 ]
 description = "Football Analysis API using StatsBomb data"
 requires-python = ">=3.8"
@@ -16,7 +16,11 @@ dependencies = [
     "statsbombpy",
     "pandas",
     "python-dotenv",
+    "google-generativeai",
+    "requests",
+    "pytest",
+    "httpx",
 ]
 
 [tool.setuptools]
-packages = ["api", "api.routers", "api.models", "api.utils"]
+packages = ["api", "api.routers", "api.services", "api.utils"]
