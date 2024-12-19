@@ -1,16 +1,15 @@
 import pandas as pd
 import requests
 from typing import Dict, Any
-import google.generativeai as genai
+import openai
 from dotenv import load_dotenv
 import os
 
 # Carrega variáveis de ambiente
 load_dotenv()
 
-# Configura o Gemini
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-model = genai.GenerativeModel('gemini-pro')
+# Configura a OpenAI
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def load_match_data(match_id: str) -> Dict[str, Any]:
     """
@@ -28,9 +27,9 @@ def load_match_data(match_id: str) -> Dict[str, Any]:
     except Exception as e:
         raise Exception(f"Erro ao carregar dados da partida: {str(e)}")
 
-def process_match_data_with_gemini(data: Dict[str, Any], query: str) -> str:
+def process_match_data_with_openai(data: Dict[str, Any], query: str) -> str:
     """
-    Processa os dados da partida usando o Gemini para responder consultas específicas.
+    Processa os dados da partida usando a OpenAI para responder consultas específicas.
     """
     try:
         prompt = f"""
@@ -41,7 +40,15 @@ def process_match_data_with_gemini(data: Dict[str, Any], query: str) -> str:
         {query}
         """
         
-        response = model.generate_content(prompt)
-        return response.text
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Você é um analista de futebol especializado."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            temperature=0.7
+        )
+        return response.choices[0].message.content
     except Exception as e:
-        raise Exception(f"Erro ao processar dados com Gemini: {str(e)}")
+        raise Exception(f"Erro ao processar dados com OpenAI: {str(e)}")

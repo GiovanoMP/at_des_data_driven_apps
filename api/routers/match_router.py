@@ -22,7 +22,10 @@ async def get_match_summary(match_id: int) -> Dict[str, Any]:
     """
     summary = analysis_service.summarize_match(match_id)
     if not summary:
-        raise HTTPException(status_code=404, detail="Não foi possível gerar a sumarização da partida")
+        raise HTTPException(
+            status_code=404,
+            detail="Não foi possível gerar a sumarização da partida"
+        )
     return summary
 
 @router.get("/matches/{match_id}/player/{player_id}")
@@ -72,4 +75,4 @@ async def get_match_analysis(
             status_code=404,
             detail="Não foi possível gerar a análise da partida"
         )
-    return analysis
+    return {"analysis": analysis}

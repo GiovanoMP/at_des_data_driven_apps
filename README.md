@@ -38,7 +38,7 @@ Gera análises narrativas personalizadas com três estilos diferentes:
 
 - **FastAPI**: Framework web de alta performance
 - **StatsBombPy**: Acesso aos dados oficiais do StatsBomb
-- **Google Gemini**: Geração de análises narrativas com IA
+- **OpenAI GPT**: Geração de análises narrativas com IA
 - **Pandas**: Processamento e análise de dados
 - **Python 3.8+**: Linguagem base do projeto
 
@@ -57,7 +57,7 @@ pip install -e .
 3. Configure as variáveis de ambiente:
 Crie um arquivo `.env` com:
 ```env
-GOOGLE_API_KEY=sua_chave_api_aqui
+OPENAI_API_KEY=sua_chave_api_aqui
 ```
 
 ## Executando a API

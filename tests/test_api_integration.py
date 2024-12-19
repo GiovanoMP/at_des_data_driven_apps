@@ -105,13 +105,16 @@ def test_match_analysis_endpoint():
         
         data = response.json()
         assert data is not None
-        assert all(k in data for k in ['match_id', 'events_summary', 'style', 'narrative'])
-        assert data['style'] == style
-        assert isinstance(data['narrative'], str)
-        assert len(data['narrative']) > 100  # Garantir que a narrativa tem conteúdo substancial
+        assert 'analysis' in data
         
-        logger.info(f"Tamanho da narrativa: {len(data['narrative'])} caracteres")
-        results[style] = data
+        analysis = data['analysis']
+        assert all(k in analysis for k in ['match_id', 'events_summary', 'style', 'narrative'])
+        assert analysis['style'] == style
+        assert isinstance(analysis['narrative'], str)
+        assert len(analysis['narrative']) > 100  # Garantir que a narrativa tem conteúdo substancial
+        
+        logger.info(f"Tamanho da narrativa: {len(analysis['narrative'])} caracteres")
+        results[style] = analysis
     
     # Testar erro com estilo inválido
     response = requests.get(f"{BASE_URL}/matches/{TEST_MATCH_ID}/analysis?style=invalido")

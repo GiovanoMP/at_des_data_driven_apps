@@ -1,22 +1,17 @@
 from typing import Dict, List
 import os
-import google.generativeai as genai
-from langchain.prompts import PromptTemplate
-from langchain.agents import AgentExecutor, Tool, ConversationalAgent
-from langchain.memory import ConversationBufferMemory
-from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
+import openai
 from dotenv import load_dotenv
 
 # Carrega as variáveis de ambiente
 load_dotenv()
 
-# Configura o Gemini
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-model = genai.GenerativeModel('gemini-pro')
+# Configura a OpenAI
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def generate_match_summary(match_data: Dict) -> str:
     """
-    Gera um resumo da partida usando Gemini.
+    Gera um resumo da partida usando OpenAI.
     """
     try:
         # Template para o resumo
@@ -35,48 +30,73 @@ def generate_match_summary(match_data: Dict) -> str:
         # Prepara o prompt
         prompt = summary_template.format(match_data=str(match_data))
         
-        # Gera o resumo usando Gemini
-        response = model.generate_content(prompt)
+        # Gera o resumo usando OpenAI
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Você é um analista esportivo especializado em futebol."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            temperature=0.7
+        )
         
-        return response.text
+        return response.choices[0].message.content
     except Exception as e:
         raise Exception(f"Erro ao gerar resumo: {str(e)}")
 
 def generate_narrative(match_data: Dict, style: str = "formal") -> str:
     """
-    Gera uma narrativa da partida no estilo especificado usando Gemini.
+    Gera uma narrativa da partida no estilo especificado usando OpenAI.
     """
     try:
         # Template para narrativa baseado no estilo
         style_prompts = {
-            "formal": "Crie uma narrativa formal e profissional da partida",
-            "humoristico": "Crie uma narrativa bem-humorada e descontraída da partida",
-            "tecnico": "Crie uma análise técnica detalhada da partida"
+            "formal": """
+            Atue como um narrador esportivo profissional e formal.
+            Gere uma narrativa objetiva e detalhada da partida.
+            """,
+            "humoristico": """
+            Atue como um narrador esportivo bem-humorado.
+            Gere uma narrativa divertida e criativa da partida.
+            """,
+            "tecnico": """
+            Atue como um analista técnico de futebol.
+            Gere uma análise tática detalhada da partida.
+            """
         }
         
-        narrative_template = f"""
-        {style_prompts.get(style, style_prompts['formal'])} com os seguintes dados:
-        {match_data}
+        # Prepara o prompt
+        prompt = f"""
+        {style_prompts.get(style, style_prompts['formal'])}
         
-        A narrativa deve:
-        1. Manter consistência com o estilo {style}
-        2. Destacar momentos importantes
-        3. Mencionar jogadores relevantes
+        Dados da partida:
+        {str(match_data)}
         """
         
-        # Gera a narrativa usando Gemini
-        response = model.generate_content(narrative_template)
+        # Gera a narrativa usando OpenAI
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Você é um narrador esportivo especializado em futebol."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=800,
+            temperature=0.7
+        )
         
-        return response.text
+        return response.choices[0].message.content
     except Exception as e:
         raise Exception(f"Erro ao gerar narrativa: {str(e)}")
 
 def setup_chat_model():
     """
-    Configura e retorna uma instância do modelo de chat Gemini.
+    Configura e retorna uma instância do modelo de chat OpenAI.
     """
     try:
-        chat = model.start_chat(history=[])
-        return chat
+        return {
+            "model": "gpt-3.5-turbo",
+            "api_key": os.getenv('OPENAI_API_KEY')
+        }
     except Exception as e:
         raise Exception(f"Erro ao configurar modelo de chat: {str(e)}")
