@@ -1,101 +1,171 @@
-# Football Match Analysis API
+# Análise de Partidas de Futebol
 
-Uma API avançada para análise de partidas de futebol utilizando dados do StatsBomb, integrada com IA generativa para análises narrativas personalizadas.
+## Requisitos do AT e Status de Implementação
 
-## Recursos
+### 1. Configuração do Ambiente 
+- Python 3.8+ configurado
+- Requirements.txt criado
+- Ambiente virtual configurado
 
-### 1. Dados Brutos da Partida
-**Endpoint:** `/matches/{match_id}`
-- Retorna dados detalhados de uma partida específica
-- Inclui todos os eventos registrados (média de ~3800 eventos por partida)
-- Formato JSON estruturado
+### 2. Organização do Projeto 
+- Estrutura de pastas organizada
+- README.md completo
+- Commits claros e descritivos
 
-### 2. Perfil do Jogador
-**Endpoint:** `/matches/{match_id}/player/{player_id}`
-- Análise detalhada do desempenho individual
-- Estatísticas chave:
-  - Passes (total e bem-sucedidos)
-  - Finalizações (total e gols)
-- Análise narrativa gerada por IA sobre o desempenho do jogador
+### 3. Sumarização de Partidas 
+- Identificação de eventos principais
+- Integração com GPT-4
+- Saída clara e amigável
 
-### 3. Sumário da Partida
-**Endpoint:** `/matches/{match_id}/summary`
-- Visão geral rápida dos principais eventos
-- Inclui:
-  - Total de gols marcados
-  - Cartões mostrados
-  - Eventos-chave da partida
+### 4. Perfil de Jogador 
+- Nome, estatísticas e métricas
+- Visualização em cards
+- Dados organizados
 
-### 4. Análise Narrativa
-**Endpoint:** `/matches/{match_id}/analysis?style={style}`
+### 5. API com FastAPI 
+- Endpoints implementados:
+  - `/matches/{match_id}`: Dados da partida
+  - `/matches/{match_id}/summary`: Resumo da partida
+  - `/matches/{match_id}/player/{player_id}`: Perfil do jogador
+  - `/matches/{match_id}/analysis`: Narrativas personalizadas
+- Validação com Pydantic
+- Documentação automática
 
-Gera análises narrativas personalizadas com três estilos diferentes:
-- **Formal**: Análise profissional e detalhada (~2200 caracteres)
-- **Humorístico**: Abordagem leve e divertida (~1400 caracteres)
-- **Técnico**: Foco em aspectos táticos e estatísticos (~1600 caracteres)
+### 6. Narração Personalizada 
+- Três estilos implementados:
+  - Formal: Análise objetiva e profissional
+  - Humorístico: Tom descontraído
+  - Técnico: Foco em estatísticas
+- Integração com GPT-4
+- Interface de seleção
 
-## Tecnologias Utilizadas
+### 7. Interface Streamlit 
+- Dashboard interativo com 4 seções:
+  - Timeline do Jogo: Visualização cronológica dos eventos
+  - Resumo da Partida: Análise detalhada gerada por IA
+  - Análise do Jogador: Estatísticas e métricas
+  - Narrativas Personalizadas: Diferentes estilos de análise
+- Tema escuro para melhor legibilidade
+- Chat interativo com contexto da partida
 
-- **FastAPI**: Framework web de alta performance
-- **StatsBombPy**: Acesso aos dados oficiais do StatsBomb
-- **OpenAI GPT**: Geração de análises narrativas com IA
-- **Pandas**: Processamento e análise de dados
-- **Python 3.8+**: Linguagem base do projeto
+### 8. LangChain 
+- Não implementado devido a conflitos de dependências
+- Após inúmeras tentativas de instalações e configurações
+- Substituído por integração direta com OpenAI GPT-4
 
-## Instalação
+### 9. Interface Avançada 
+- Timeline interativa com eventos da partida
+- Estatísticas visuais em cards
+- Tema escuro para melhor experiência
 
-1. Clone o repositório:
-```bash
-git clone [URL_DO_REPOSITÓRIO]
+### 10. Integração Completa 
+- Fluxo funcional entre API e Dashboard
+- API e Streamlit independentes
+- Todas funcionalidades principais cobertas
+
+### 11. Entrega 
+- Código no GitHub
+- Documentação atualizada
+- Requirements.txt completo
+
+## Estrutura do Projeto
+
+```
+.
+├── api/
+│   ├── routes/
+│   │   └── match_routes.py
+│   └── services/
+│       └── match_analysis.py
+├── streamlit/
+│   ├── dashboard.py
+│   └── utils/
+│       ├── data_loader.py
+│       └── visualization.py
+└── requirements.txt
 ```
 
-2. Instale as dependências:
+## Funcionalidades Implementadas
+
+### Dashboard Principal
+1. **Timeline Interativa**
+   - Visualização cronológica de eventos
+   - Cores e ícones distintos para cada tipo de evento
+   - Interatividade com hover e clique
+
+2. **Resumo da Partida**
+   - Análise detalhada gerada por IA
+   - Identificação de momentos-chave
+   - Contexto tático e técnico
+
+3. **Perfil do Jogador**
+   - Cards com estatísticas
+   - Métricas de performance
+   - Visualização clara e organizada
+
+4. **Narrativas Personalizadas**
+   - Três estilos de narrativa
+   - Integração com GPT-4
+   - Interface de seleção intuitiva
+
+5. **Chat Interativo**
+   - Perguntas sobre a partida
+   - Contexto completo dos eventos
+   - Respostas personalizadas
+
+## Observações Importantes
+
+1. **Sobre o LangChain**
+   - Múltiplas tentativas de implementação realizadas
+   - Conflitos entre dependências impossibilitaram o uso
+   - Solução: Integração direta com GPT-4 como Agente/LLM
+
+2. **Dados Simulados**
+   - Estrutura preparada para dados reais
+   - Demonstração completa de funcionalidades
+   - Fácil integração futura com APIs reais
+
+## Como Executar
+
+1. **Configuração do Ambiente**
 ```bash
-pip install -e .
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+pip install -r requirements.txt
 ```
 
-3. Configure as variáveis de ambiente:
+2. **Variáveis de Ambiente**
 Crie um arquivo `.env` com:
-```env
-OPENAI_API_KEY=sua_chave_api_aqui
+```
+OPENAI_API_KEY=sua_chave_aqui
 ```
 
-## Executando a API
-
+3. **Executando a API**
 ```bash
 uvicorn api.main:app --reload
 ```
 
-## Testes
-
-Execute os testes de integração:
+4. **Executando o Dashboard**
 ```bash
-python tests/test_api_integration.py
+streamlit run streamlit/dashboard.py
 ```
 
-Os testes cobrem todos os endpoints principais e verificam:
-- Integridade dos dados retornados
-- Funcionamento da integração com IA
-- Diferentes estilos de narrativa
-- Precisão das estatísticas
+## Tecnologias Utilizadas
 
-## Documentação Adicional
+- **Backend**: FastAPI
+- **Frontend**: Streamlit
+- **IA**: OpenAI GPT-4
+- **Visualização**: Plotly
+- **Dados**: JSON simulado
 
-Após iniciar o servidor, acesse:
-- Documentação Swagger UI: `http://localhost:8000/docs`
-- Documentação ReDoc: `http://localhost:8000/redoc`
+## Próximos Passos
 
-## Contribuindo
-
-1. Fork o projeto
-2. Crie sua Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a Branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Integração com APIs reais de dados de futebol
+2. Implementação de comparação entre jogadores
+3. Mais opções de visualização
+4. Expansão das capacidades do chat
 
 ## Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
----
-Desenvolvido por Giovano M Panatta - giovano.m.panatta@gmail.com
+MIT License

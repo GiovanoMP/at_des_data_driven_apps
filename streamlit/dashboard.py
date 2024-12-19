@@ -166,21 +166,28 @@ def create_timeline(events: List[Dict]) -> go.Figure:
     # Cores e símbolos por tipo de evento
     event_styles = {
         "Goal": {"color": "green", "symbol": "star", "size": 25},
-        "Card": {"color": "yellow", "symbol": "square", "size": 20}
+        "Card": {"color": "yellow", "symbol": "square", "size": 20},
+        "Substitution": {"color": "blue", "symbol": "circle", "size": 20}
     }
     
     # Adiciona eventos
     for event in events:
         style = event_styles.get(event['type'], {"color": "gray", "symbol": "circle", "size": 15})
         
-        # Texto do evento
-        event_text = []
-        event_text.append(f"{event['minute']}'")
-        event_text.append(event['player'])
-        if event.get('assist'):
-            event_text.append(f"(Assist: {event['assist']})")
-        if event.get('description'):
-            event_text.append(f"- {event['description']}")
+        # Texto do evento baseado no tipo
+        event_text = [f"{event['minute']}'"]
+        
+        if event['type'] == 'Substitution':
+            event_text.append(f" {event['player_out']} {event['player_in']}")
+        else:
+            if 'player' in event:
+                event_text.append(event['player'])
+            if event.get('assist'):
+                event_text.append(f"(Assist: {event['assist']})")
+            if event.get('description'):
+                event_text.append(f"- {event['description']}")
+            if event.get('card_type'):
+                event_text.append(f"({event['card_type']})")
         
         fig.add_trace(go.Scatter(
             x=[event['minute']],
@@ -210,13 +217,16 @@ def create_timeline(events: List[Dict]) -> go.Figure:
         yaxis_title="Time",
         showlegend=True,
         height=400,
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        font=dict(size=12),
+        plot_bgcolor='#1a1a1a',
+        paper_bgcolor='#1a1a1a',
+        font=dict(
+            color='#ffffff',
+            size=12
+        ),
         xaxis=dict(
             showgrid=True,
             gridwidth=1,
-            gridcolor='lightgray',
+            gridcolor='#404040',
             range=[-5, 95]
         ),
         yaxis=dict(
@@ -235,22 +245,23 @@ def create_timeline(events: List[Dict]) -> go.Figure:
 
 def show_event_details(events: List[Dict]):
     """Mostra detalhes dos eventos em um formato mais organizado"""
-    st.markdown("### 📝 Detalhes dos Eventos")
+    st.markdown("### Detalhes dos Eventos")
     
     # Separar eventos por tipo
     goals = [e for e in events if e['type'] == 'Goal']
     cards = [e for e in events if e['type'] == 'Card']
+    subs = [e for e in events if e['type'] == 'Substitution']
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("#### ⚽ Gols")
+        st.markdown("#### Gols")
         for goal in goals:
             details = []
             if goal.get('assist'):
-                details.append(f"🎯 Assist: {goal['assist']}")
+                details.append(f"Assist: {goal['assist']}")
             if goal.get('description'):
-                details.append(f"📝 {goal['description']}")
+                details.append(f"{goal['description']}")
             
             st.markdown(f"""
             **{goal['minute']}'** - {goal['player']} ({goal['team']})  
@@ -258,11 +269,20 @@ def show_event_details(events: List[Dict]):
             """)
     
     with col2:
-        st.markdown("#### 🟨 Cartões")
+        st.markdown("#### Cartões")
         for card in cards:
             st.markdown(f"""
             **{card['minute']}'** - {card['player']} ({card['team']})  
-            {f"📝 {card['description']}" if card.get('description') else ''}
+            {f"{card.get('card_type', 'Amarelo')}" if card.get('card_type') else 'Amarelo'}
+            """)
+    
+    with col3:
+        st.markdown("#### Substituições")
+        for sub in subs:
+            st.markdown(f"""
+            **{sub['minute']}'** - {sub['team']}  
+            Saiu: {sub['player_out']}  
+            Entrou: {sub['player_in']}
             """)
 
 def show_player_stats(player: Dict):
@@ -276,40 +296,62 @@ def show_player_stats(player: Dict):
     
     # Informações básicas
     st.markdown(f"""
-    ## 👤 {info['player_name']}
-    ### {info['team']} | #{info['number']} | {info['position']}
+    ## {info['player_name']}
+    ### {info['team']} | {info['position']}
     """)
     
     # Estatísticas em cards
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("### 🎯 Passes")
+        st.markdown("### Passes")
+        successful = stats['passes'].get('successful', 0)
+        total = stats['passes'].get('total', 0)
+        accuracy = int((successful / total * 100) if total > 0 else 0)
+        
         st.metric(
             "Total de Passes",
-            f"{stats['passes']['successful']}/{stats['passes']['total']}",
-            f"{stats['passes']['accuracy']}% precisão"
+            f"{successful}/{total}",
+            f"{accuracy}% precisão"
         )
     
     with col2:
-        st.markdown("### ⚽ Finalizações")
+        st.markdown("### Finalizações")
+        on_target = stats['shots'].get('on_target', 0)
+        total_shots = stats['shots'].get('total', 0)
+        goals = stats['shots'].get('goals', 0)
+        
         st.metric(
             "No Gol/Total",
-            f"{stats['shots']['on_target']}/{stats['shots']['total']}",
-            f"{stats['shots']['goals']} gols"
+            f"{on_target}/{total_shots}",
+            f"{goals} gols"
         )
     
     with col3:
-        st.markdown("### 🛡️ Desarmes")
-        st.metric(
-            "Bem Sucedidos",
-            f"{stats['tackles']['successful']}/{stats['tackles']['total']}",
-            f"{int(stats['tackles']['successful']/stats['tackles']['total']*100)}% sucesso"
-        )
+        st.markdown("### Desarmes")
+        if isinstance(stats.get('tackles'), dict):
+            successful_tackles = stats['tackles'].get('successful', 0)
+            total_tackles = stats['tackles'].get('total', 0)
+            tackle_accuracy = int((successful_tackles / total_tackles * 100) if total_tackles > 0 else 0)
+            
+            st.metric(
+                "Bem Sucedidos",
+                f"{successful_tackles}/{total_tackles}",
+                f"{tackle_accuracy}% sucesso"
+            )
+        else:
+            st.metric(
+                "Total de Desarmes",
+                str(stats.get('tackles', 0)),
+                "Desarmes realizados"
+            )
 
 def chat_with_context(prompt: str, match_data: Dict) -> str:
     """Chat interativo com contexto da partida"""
     try:
+        if not hasattr(st.session_state, 'messages'):
+            st.session_state.messages = []
+
         system_prompt = """Você é um assistente especializado em futebol, com conhecimento profundo sobre o esporte.
         Responda às perguntas sobre a partida de forma clara e precisa, usando os dados fornecidos.
         Se necessário, faça análises táticas e técnicas, mas mantenha a linguagem acessível."""
@@ -322,7 +364,12 @@ def chat_with_context(prompt: str, match_data: Dict) -> str:
         - Data: {match_data['date']}
 
         Eventos da Partida:
-        {', '.join([f"{e['minute']}' - {e['type']} por {e['player']}" for e in match_data['events']])}
+        {', '.join([
+            f"{e['minute']}' - " + (
+                f"🔄 {e['player_out']} ➡ {e['player_in']}" if e['type'] == 'Substitution'
+                else f"{e['type']} por {e.get('player', 'Desconhecido')}"
+            ) for e in match_data['events']
+        ])}
         """
 
         response = client.chat.completions.create(
@@ -409,7 +456,7 @@ def main():
         </style>
     """, unsafe_allow_html=True)
     
-    st.title("⚽ Análise de Futebol")
+    st.title(" Análise de Futebol")
     
     # Carrega dados da partida
     match_data = get_match_data()
@@ -420,7 +467,7 @@ def main():
     # Cabeçalho da partida
     st.markdown(f"""
     <div class="custom-header">
-        <h2>🇹🇷 {match_data['home_team']} vs {match_data['away_team']} 🇮🇹</h2>
+        <h2> {match_data['home_team']} vs {match_data['away_team']}</h2>
         <h1>{match_data['score']}</h1>
         <p>{match_data['date']} | {match_data['stadium']}</p>
     </div>
@@ -428,10 +475,10 @@ def main():
     
     # Tabs principais
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Timeline do Jogo",
-        "📝 Resumo da Partida",
-        "👤 Análise do Jogador",
-        "🎯 Narrativas Personalizadas"
+        " Timeline do Jogo",
+        " Resumo da Partida",
+        " Análise do Jogador",
+        " Narrativas Personalizadas"
     ])
     
     # Tab 1: Timeline e Eventos
@@ -462,20 +509,20 @@ def main():
         
         if player and 'analysis' in player:
             st.markdown("---")
-            st.markdown("### 📊 Análise Detalhada do Jogador")
+            st.markdown("### Análise Detalhada do Jogador")
             st.markdown(player['analysis'])
     
     # Tab 4: Narrativas
     with tab4:
-        st.markdown("### 📖 Narrativas Personalizadas")
+        st.markdown("### Narrativas Personalizadas")
         
         style = st.selectbox(
             "Selecione o estilo de narrativa",
             ["formal", "humoristico", "tecnico"],
             format_func=lambda x: {
-                "formal": "🎯 Formal - Análise objetiva e profissional",
-                "humoristico": "😄 Humorístico - Narrativa descontraída",
-                "tecnico": "📊 Técnico - Foco em dados e estatísticas"
+                "formal": " Formal - Análise objetiva e profissional",
+                "humoristico": " Humorístico - Narrativa descontraída",
+                "tecnico": " Técnico - Foco em dados e estatísticas"
             }[x],
             key="narrative_style"
         )
@@ -492,7 +539,7 @@ def main():
     
     # Chat
     st.markdown("---")
-    st.header("💬 Chat Interativo")
+    st.header(" Chat Interativo")
     
     # Histórico
     for message in st.session_state.messages:
