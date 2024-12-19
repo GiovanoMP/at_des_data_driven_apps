@@ -72,18 +72,53 @@ def get_player_profile(include_analysis: bool = True) -> Dict:
         return {}
 
 def get_match_analysis(style: str) -> str:
-    """Obtém análise da partida via API"""
+    """Gera análise narrativa da partida em diferentes estilos"""
     try:
-        response = requests.get(
-            f"{API_BASE_URL}/matches/{MATCH_ID}/analysis",
-            params={"style": style}
+        match_data = get_match_data()
+        if not match_data:
+            return "Erro ao obter dados da partida."
+
+        # Construindo o prompt baseado no estilo
+        prompts = {
+            "formal": """Você é um comentarista esportivo profissional. Analise esta partida de futebol de forma objetiva e formal, 
+                     focando em aspectos táticos e técnicos. Use linguagem profissional e mantenha um tom sério.""",
+            
+            "humoristico": """Você é um comentarista esportivo bem-humorado. Faça uma análise divertida da partida,
+                          usando analogias engraçadas e trocadilhos. Mantenha o conteúdo leve e entretenido, mas sem perder a essência do jogo.""",
+            
+            "tecnico": """Você é um analista tático de futebol. Faça uma análise profunda e técnica da partida,
+                      focando em estatísticas, formações, movimentações e decisões táticas. Use termos técnicos do futebol."""
+        }
+
+        base_prompt = f"""
+        Analise esta partida de futebol:
+        - Placar: {match_data['score']}
+        - Times: {match_data['home_team']} vs {match_data['away_team']}
+        - Estádio: {match_data['stadium']}
+        - Data: {match_data['date']}
+
+        Eventos importantes:
+        {', '.join([f"{e['minute']}' - {e['type']} por {e['player']}" for e in match_data['events']])}
+
+        {prompts[style]}
+        
+        Formate sua resposta em parágrafos claros, usando markdown para destacar pontos importantes.
+        """
+
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": prompts[style]},
+                {"role": "user", "content": base_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=800
         )
-        response.raise_for_status()
-        data = response.json()
-        return data.get('narrative', '')  # Agora usando o campo correto
+
+        return response.choices[0].message.content
+
     except Exception as e:
-        st.error(f"Erro ao obter análise: {str(e)}")
-        return ""
+        return f"Erro ao gerar narrativa: {str(e)}"
 
 def generate_llm_summary(match_data: Dict) -> str:
     """Gera um resumo personalizado usando GPT-4"""
@@ -273,19 +308,38 @@ def show_player_stats(player: Dict):
         )
 
 def chat_with_context(prompt: str, match_data: Dict) -> str:
-    """Chat com contexto usando OpenAI"""
+    """Chat interativo com contexto da partida"""
     try:
+        system_prompt = """Você é um assistente especializado em futebol, com conhecimento profundo sobre o esporte.
+        Responda às perguntas sobre a partida de forma clara e precisa, usando os dados fornecidos.
+        Se necessário, faça análises táticas e técnicas, mas mantenha a linguagem acessível."""
+
+        context = f"""
+        Contexto da Partida:
+        - Placar: {match_data['score']}
+        - Times: {match_data['home_team']} vs {match_data['away_team']}
+        - Estádio: {match_data['stadium']}
+        - Data: {match_data['date']}
+
+        Eventos da Partida:
+        {', '.join([f"{e['minute']}' - {e['type']} por {e['player']}" for e in match_data['events']])}
+        """
+
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Você é um especialista em análise de futebol."},
-                {"role": "user", "content": f"Dados da partida:\n{json.dumps(match_data, indent=2)}\n\nPergunta: {prompt}"}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": context},
+                {"role": "user", "content": prompt}
             ],
-            temperature=0.7
+            temperature=0.7,
+            max_tokens=500
         )
+
         return response.choices[0].message.content
+
     except Exception as e:
-        return f"Erro ao gerar resposta: {str(e)}"
+        return f"Erro ao processar pergunta: {str(e)}"
 
 def main():
     # Estilo CSS para tema escuro
